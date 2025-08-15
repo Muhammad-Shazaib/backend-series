@@ -9,10 +9,30 @@ diagonsedWith: {
     type: String,
     required: true,
 },
-gender: {
+address: {
     type: String,
     required: true,
-}
+},
+age: {
+    type: Number,
+    required: true,
+},
+
+bloodGroup: {
+    type: String,
+    required: true,
+},
+gender: {
+    type: String,
+    enum: ['male', 'female', 'other'],
+    required: true,
+},
+
+admittedIn: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'hospital',
+    required: true,
+},
 
 }, {timestamps: true,} );
 
