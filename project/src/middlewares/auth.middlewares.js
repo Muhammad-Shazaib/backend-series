@@ -9,23 +9,23 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     if (!token) {
         throw new ApiError(401, "Unauthorized request");
     }
-try {
-    // const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    // const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
-     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+    try {
+        // const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        // const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
 
-    if (!user) {
-        throw new ApiError(401, "Invalid Access Token");
+        if (!user) {
+            throw new ApiError(401, "Invalid Access Token");
+        }
+        req.user = user;
+        next();
+        
+    } catch (error) {
+        throw new Error(401, error?.message || "Invalid Access Token",);
+
     }
-    req.user = user;
-    next();
-    
-} catch (error) {
-    throw new Error(401, error?.message || "Invalid Access Token",);
-       
-}
-    
+
 });
 
 
