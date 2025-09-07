@@ -196,20 +196,20 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 });
 
-const changeCurrentPassword = asyncHandler(async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
+// const changeCurrentPassword = asyncHandler(async (req, res) => {
+//     const { oldPassword, newPassword } = req.body;
 
-    const user = await User.findById(req.user?._id);
-    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
-    if (!isPasswordValid) {
-        throw new ApiError(400, "Invalid old password");
-    }
+//     const user = await User.findById(req.user?._id);
+//     const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+//     if (!isPasswordValid) {
+//         throw new ApiError(400, "Invalid old password");
+//     }
 
-    user.password = newPassword;
-    await user.save({ validateBeforeSave: false });
+//     user.password = newPassword;
+//     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
-});
+//     return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
+// });
 
 // const changeCurrentPassword = asyncHandler(async (req, res) => {
 //     const { oldPassword, newPassword } = req.body;
@@ -235,6 +235,33 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 //         .status(200)
 //         .json(new ApiResponse(200, {}, "Password changed successfully"));
 // });
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(400, "Old and new password are required");
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Invalid old password");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
 
 const getUserProfile = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, req.user, "User profile fetched successfully"));
