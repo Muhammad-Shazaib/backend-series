@@ -4,6 +4,7 @@ import User from "../models/user.module.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
 
 // get user details from frontend
 // validate - not empty
@@ -128,12 +129,12 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-    User.findByIdAndUpdate(
+   await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:
+            $unset:
             {
-                refreshToken: undefined
+                refreshToken: 1
             }
         },
         { new: true }
@@ -159,7 +160,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     try {
-        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_EXPIRY)
 
         const user = await User.findById(decodedToken?._id)
 
@@ -209,6 +210,31 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"));
 });
+
+// const changeCurrentPassword = asyncHandler(async (req, res) => {
+//     const { oldPassword, newPassword } = req.body;
+
+//     const user = await User.findById(req.user?._id);
+//     if (!user) {
+//         throw new ApiError(404, "User not found");
+//     }
+
+//     // old password check
+//     const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+//     if (!isPasswordValid) {
+//         throw new ApiError(400, "Invalid old password");
+//     }
+
+//     // hash new password
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+//     user.password = Password;
+
+//     await user.save({ validateBeforeSave: false });
+
+//     return res
+//         .status(200)
+//         .json(new ApiResponse(200, {}, "Password changed successfully"));
+// });
 
 const getUserProfile = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, req.user, "User profile fetched successfully"));
